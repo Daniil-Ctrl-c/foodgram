@@ -113,8 +113,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         resp['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
         return resp
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'], url_path='get_link')
     def get_link(self, request, pk=None):
         recipe = self.get_object()
         url = request.build_absolute_uri(f'/recipes/{recipe.pk}/')
         return Response({'link': url})
+
