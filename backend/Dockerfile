@@ -16,6 +16,8 @@ RUN pip install --upgrade pip wheel && pip install --no-cache-dir -r requirement
 
 COPY . .
 
+COPY ./data /app/data
+
 RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
