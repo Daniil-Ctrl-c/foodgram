@@ -1,0 +1,54 @@
+version: "3.8"
+
+volumes:
+  foodgram_pg_data:
+  foodgram_static:
+  foodgram_media_data:
+
+services:
+  foodgram_db:
+    container_name: foodgram_db
+    image: postgres:13
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - foodgram_pg_data:/var/lib/postgresql/data
+    networks:
+      - foodgram_net
+
+  foodgram_backend:
+    container_name: foodgram_backend
+    image: daniilctrlc/foodgram_backend:latest
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - foodgram_db
+    volumes:
+      - foodgram_static:/app/static
+      - foodgram_media_data:/app/media
+    networks:
+      - foodgram_net
+
+  foodgram_gateway:
+    container_name: foodgram_gateway
+    image: daniilctrlc/foodgram_gateway:latest
+    restart: always
+    depends_on:
+      - foodgram_backend
+    ports:
+      - "9020:80"
+    volumes:
+      - foodgram_static:/static
+      - foodgram_media_data:/media
+    networks:
+      - foodgram_net
+
+networks:
+  foodgram_net:
+    external: true
