@@ -17,8 +17,8 @@ class RecipeFilter(filters.FilterSet):
         if not user or user.is_anonymous:
             return queryset.none() if value else queryset
         qs = (
-            queryset.filter(favorites__user=user) if value
-            else queryset.exclude(favorites__user=user)
+            queryset.filter(favorited_by__user=user) if value
+            else queryset.exclude(favorited_by__user=user)
         )
         return qs.distinct()
 
@@ -27,8 +27,8 @@ class RecipeFilter(filters.FilterSet):
         if not user or user.is_anonymous:
             return queryset.none() if value else queryset
         qs = (
-            queryset.filter(shoppingcarts__user=user) if value
-            else queryset.exclude(shoppingcarts__user=user)
+            queryset.filter(shopping_carts__user=user) if value
+            else queryset.exclude(shopping_carts__user=user)
         )
         return qs.distinct()
 
