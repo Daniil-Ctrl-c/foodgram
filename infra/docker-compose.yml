@@ -11,7 +11,7 @@ services:
     image: postgres:13
     restart: always
     env_file:
-      - ../backend/.env
+      - .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -32,7 +32,7 @@ services:
       - static:/app/static
       - media:/app/media
     env_file:
-      - ../backend/.env
+      - .env
     depends_on:
       - db
     ports:
