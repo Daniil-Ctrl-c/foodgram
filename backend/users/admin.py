@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.html import format_html
+
 from recipes.models import ShoppingCart
 from users.models import Subscription
 
@@ -19,42 +19,19 @@ class ShoppingCartInline(admin.TabularInline):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     fieldsets = BaseUserAdmin.fieldsets + (
-        ("Дополнительно", {"fields": ("avatar", "avatar_thumbnail")}),
+        ("Дополнительно", {"fields": ("avatar",)}),
     )
-    readonly_fields = ("avatar_thumbnail",)
+    readonly_fields = ("avatar",)
     inlines = (ShoppingCartInline,)
-
-    list_display = (
-        "id",
-        "username",
-        "email",
-        "is_active",
-        "is_staff",
-        "avatar_thumbnail",
-        "subscriptions_count",
-    )
+    list_display = ("username", "email", "is_active", "is_staff", "avatar")
+    list_display_links = ("username", "email")
     list_filter = ("is_staff", "is_active")
     search_fields = ("username", "email")
-
-    def avatar_thumbnail(self, obj):
-        if obj.avatar:
-            return format_html(
-                '<img src="{}" style="width:40px;border-radius:20px;" />',
-                obj.avatar.url,
-            )
-        return "-"
-
-    avatar_thumbnail.short_description = "Аватар"
-
-    def subscriptions_count(self, obj):
-        # Считаем, сколько пользователей подписано на данного пользователя
-        return Subscription.objects.filter(following=obj).count()
-
-    subscriptions_count.short_description = "Подписчиков"
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ("user", "following")
+    list_filter = ("user", "following")
     search_fields = ("user__username", "following__username")
     autocomplete_fields = ("user", "following")

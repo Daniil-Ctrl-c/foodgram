@@ -11,8 +11,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # API рецептов (рецепты, теги, ингредиенты)
     path("api/", include("recipes.urls")),
-    # API пользователей и подписок
-    path("api/", include("users.urls")),
+    # API пользователей и подписок (перенесено в новое API-приложение)
+    path("api/users/", include("api.users.urls")),
     # Djoser аутентификация
     path("api/auth/", include("djoser.urls")),
     path("api/auth/", include("djoser.urls.authtoken")),

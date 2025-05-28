@@ -1,54 +1,44 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import (
-    UserCreateSerializer as DjoserUserCreateSerializer,
+    UserCreateSerializer as BaseUserCreateSerializer,
+    UserSerializer as BaseUserSerializer
 )
-from djoser.serializers import UserSerializer as DjoserUserSerializer
 from recipes.serializers import Base64ImageField, RecipeReadSerializer
 from rest_framework import serializers
-from users.models import Subscription
-
-User = get_user_model()
+from users.models import Subscription, User
 
 
-class UserCreateSerializer(DjoserUserCreateSerializer):
-    """
-    Сериализатор для регистрации нового пользователя с поддержкой avatar.
-    """
-
+class UserCreateSerializer(BaseUserCreateSerializer):
+    """Регистрация пользователя с аватаром."""
     avatar = Base64ImageField(max_length=None, use_url=True, required=False)
 
-    class Meta(DjoserUserCreateSerializer.Meta):
+    class Meta(BaseUserCreateSerializer.Meta):
         model = User
-        fields = tuple(DjoserUserCreateSerializer.Meta.fields) + ("avatar",)
+        fields = (*BaseUserCreateSerializer.Meta.fields, "avatar")
 
 
-class UserSerializer(DjoserUserSerializer):
-    """
-    Расширяем стандартный сериализатор Djoser:
-      - возможность загрузки avatar (base64)
-      - поле is_subscribed
-    """
-
+class UserSerializer(BaseUserSerializer):
+    """Профиль пользователя с аватаром и флагом подписки."""
     avatar = Base64ImageField(max_length=None, use_url=True, required=False)
     is_subscribed = serializers.SerializerMethodField()
 
-    class Meta(DjoserUserSerializer.Meta):
+    class Meta(BaseUserSerializer.Meta):
         model = User
-        fields = tuple(DjoserUserSerializer.Meta.fields) + (
-            "avatar",
-            "is_subscribed",
-        )
+        fields = (*BaseUserSerializer.Meta.fields, "avatar", "is_subscribed")
 
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
-        if not request or request.user.is_anonymous:
-            return False
-        return Subscription.objects.filter(
-            user=request.user, following=obj
-        ).exists()
+        return bool(
+            request and
+            not request.user.is_anonymous and
+            Subscription.objects.filter(
+                user=request.user, following=obj
+            ).exists()
+        )
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """Информация о подписке."""
     id = serializers.ReadOnlyField(source="following.id")
     email = serializers.EmailField(source="following.email", read_only=True)
     username = serializers.ReadOnlyField(source="following.username")
@@ -57,20 +47,13 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     avatar = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Subscription
         fields = (
-            "id",
-            "email",
-            "username",
-            "first_name",
-            "last_name",
-            "avatar",
-            "is_subscribed",
-            "recipes",
-            "recipes_count",
+            "id", "email", "username", "first_name", "last_name",
+            "avatar", "is_subscribed", "recipes", "recipes_count"
         )
 
     def get_avatar(self, obj):
@@ -78,8 +61,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         avatar = obj.following.avatar
         return (
             request.build_absolute_uri(avatar.url)
-            if avatar and request
-            else None
+            if avatar and request else None
         )
 
     def get_is_subscribed(self, obj):
@@ -88,6 +70,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         qs = obj.following.recipes.all()[:3]
         return RecipeReadSerializer(qs, many=True, context=self.context).data
-
-    def get_recipes_count(self, obj):
-        return obj.following.recipes.count()
