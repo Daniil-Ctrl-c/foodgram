@@ -1,5 +1,4 @@
 from django_filters import rest_framework as filters
-
 from recipes.models import Ingredient, Recipe, Tag
 
 
@@ -18,7 +17,9 @@ class RecipeFilter(filters.FilterSet):
         # собираем все переданные ?tags=...
         slugs = self.request.query_params.getlist("tags")
         # оставляем только существующие слаги
-        valid = Tag.objects.filter(slug__in=slugs).values_list("slug", flat=True)
+        valid = Tag.objects.filter(slug__in=slugs).values_list(
+            "slug", flat=True
+        )
         if not valid:
             return queryset  # если ни один слаг не валиден — не фильтруем
         return queryset.filter(tags__slug__in=valid).distinct()

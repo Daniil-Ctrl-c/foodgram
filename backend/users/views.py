@@ -6,7 +6,6 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-
 from users.models import Subscription, User
 from users.serializers import SubscriptionSerializer, UserSerializer
 
@@ -28,7 +27,9 @@ class UserViewSet(BaseUserViewSet):
             return [AllowAny()]
         return super().get_permissions()
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    @action(
+        detail=True, methods=["post"], permission_classes=[IsAuthenticated]
+    )
     def subscribe(self, request, id=None):
         author = self.get_object()
         user = request.user
@@ -44,7 +45,8 @@ class UserViewSet(BaseUserViewSet):
         )
         if not created:
             return Response(
-                {"errors": "Вы уже подписаны"}, status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Вы уже подписаны"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         serializer = UserSerializer(author, context={"request": request})
@@ -61,7 +63,8 @@ class UserViewSet(BaseUserViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Subscription.DoesNotExist:
             return Response(
-                {"errors": "Вы не подписаны"}, status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Вы не подписаны"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
     @action(
@@ -104,11 +107,14 @@ class UserViewSet(BaseUserViewSet):
             if raw.startswith("data:") and "base64," in raw:
                 fmt, imgstr = raw.split("base64,")
                 ext = fmt.split("/")[-1].rstrip(";")
-                file = ContentFile(base64.b64decode(imgstr), name=f"avatar.{ext}")
+                file = ContentFile(
+                    base64.b64decode(imgstr), name=f"avatar.{ext}"
+                )
 
         if not file:
             return Response(
-                {"errors": "Не передан файл avatar"}, status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Не передан файл avatar"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         user.avatar = file

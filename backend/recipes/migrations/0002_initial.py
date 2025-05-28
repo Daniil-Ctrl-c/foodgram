@@ -28,7 +28,8 @@ class Migration(migrations.Migration):
             model_name="recipetag",
             name="recipe",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="recipes.recipe"
+                on_delete=django.db.models.deletion.CASCADE,
+                to="recipes.recipe",
             ),
         ),
         migrations.AddField(
@@ -60,7 +61,9 @@ class Migration(migrations.Migration):
             model_name="recipe",
             name="tags",
             field=models.ManyToManyField(
-                related_name="recipes", through="recipes.RecipeTag", to="recipes.Tag"
+                related_name="recipes",
+                through="recipes.RecipeTag",
+                to="recipes.Tag",
             ),
         ),
         migrations.AddField(

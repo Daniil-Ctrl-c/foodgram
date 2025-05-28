@@ -1,11 +1,10 @@
-
 from django.contrib.auth import get_user_model
-from djoser.serializers import \
-    UserCreateSerializer as DjoserUserCreateSerializer
+from djoser.serializers import (
+    UserCreateSerializer as DjoserUserCreateSerializer,
+)
 from djoser.serializers import UserSerializer as DjoserUserSerializer
-from rest_framework import serializers
-
 from recipes.serializers import Base64ImageField, RecipeReadSerializer
+from rest_framework import serializers
 from users.models import Subscription
 
 User = get_user_model()
@@ -44,7 +43,9 @@ class UserSerializer(DjoserUserSerializer):
         request = self.context.get("request")
         if not request or request.user.is_anonymous:
             return False
-        return Subscription.objects.filter(user=request.user, following=obj).exists()
+        return Subscription.objects.filter(
+            user=request.user, following=obj
+        ).exists()
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -75,7 +76,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         request = self.context.get("request")
         avatar = obj.following.avatar
-        return request.build_absolute_uri(avatar.url) if avatar and request else None
+        return (
+            request.build_absolute_uri(avatar.url)
+            if avatar and request
+            else None
+        )
 
     def get_is_subscribed(self, obj):
         return True

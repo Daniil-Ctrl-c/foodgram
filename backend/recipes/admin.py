@@ -1,9 +1,14 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from rangefilter.filters import NumericRangeFilter
-
-from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                            ShoppingCart, Tag)
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    IngredientInRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
 
 
 class IngredientInRecipeInline(admin.TabularInline):
@@ -47,7 +52,8 @@ class RecipeAdmin(admin.ModelAdmin):
     def image_thumbnail(self, obj):
         if obj.image:
             return format_html(
-                '<img src="{}" style="width:60px;border-radius:4px;" />', obj.image.url
+                '<img src="{}" style="width:60px;border-radius:4px;" />',
+                obj.image.url,
             )
         return "-"
 
@@ -69,7 +75,9 @@ class RecipeAdmin(admin.ModelAdmin):
         writer = csv.writer(response)
         writer.writerow(field_names)
         for obj in queryset:
-            writer.writerow([obj.id, obj.name, obj.author.username, obj.cooking_time])
+            writer.writerow(
+                [obj.id, obj.name, obj.author.username, obj.cooking_time]
+            )
         return response
 
     export_to_csv.short_description = "Экспорт выбранных рецептов в CSV"

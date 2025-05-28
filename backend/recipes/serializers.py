@@ -4,16 +4,17 @@ import uuid
 import six
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from rest_framework import serializers
-
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
+from rest_framework import serializers
 
 User = get_user_model()
 
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
-        if isinstance(data, six.string_types) and data.startswith("data:image"):
+        if isinstance(data, six.string_types) and data.startswith(
+            "data:image"
+        ):
             header, imgstr = data.split(";base64,")
             ext = header.split("/")[-1]
             name = f"{uuid.uuid4().hex[:10]}.{ext}"
@@ -36,7 +37,9 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = IngredientInRecipe
@@ -51,7 +54,9 @@ class IngredientAmountWriteSerializer(serializers.Serializer):
     """
 
     id = serializers.IntegerField(required=False)
-    ingredient = serializers.DictField(child=serializers.IntegerField(), required=False)
+    ingredient = serializers.DictField(
+        child=serializers.IntegerField(), required=False
+    )
     amount = serializers.IntegerField(min_value=1)
 
     def validate(self, data):
@@ -93,7 +98,11 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         req = self.context.get("request")
-        return req.build_absolute_uri(obj.image.url) if obj.image and req else None
+        return (
+            req.build_absolute_uri(obj.image.url)
+            if obj.image and req
+            else None
+        )
 
     def get_is_favorited(self, obj):
         req = self.context.get("request")
@@ -114,13 +123,22 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountWriteSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all()
+    )
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Recipe
-        fields = ("tags", "ingredients", "name", "image", "text", "cooking_time")
+        fields = (
+            "tags",
+            "ingredients",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
 
     def validate_ingredients(self, value):
         if not value:
@@ -129,7 +147,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         for item in value:
             pk = item.get("id") or item.get("ingredient", {}).get("id")
             if pk in seen:
-                raise serializers.ValidationError("Ингредиенты не должны повторяться.")
+                raise serializers.ValidationError(
+                    "Ингредиенты не должны повторяться."
+                )
             seen.add(pk)
         return value
 
@@ -181,12 +201,14 @@ class RecipeSerializer(serializers.Serializer):
         return RecipeReadSerializer(instance, context=self.context).data
 
     def to_internal_value(self, data):
-        return RecipeWriteSerializer(data=data, context=self.context).run_validation(
-            data
-        )
+        return RecipeWriteSerializer(
+            data=data, context=self.context
+        ).run_validation(data)
 
     def create(self, validated_data):
-        return RecipeWriteSerializer(context=self.context).create(validated_data)
+        return RecipeWriteSerializer(context=self.context).create(
+            validated_data
+        )
 
     def update(self, instance, validated_data):
         return RecipeWriteSerializer(context=self.context).update(

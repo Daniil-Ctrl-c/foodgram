@@ -1,17 +1,28 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from recipes.filters import IngredientFilter, RecipeFilter
+from recipes.models import (
+    Favorite,
+    Ingredient,
+    IngredientInRecipe,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
+from recipes.serializers import (
+    IngredientSerializer,
+    RecipeReadSerializer,
+    RecipeSerializer,
+    TagSerializer,
+)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly,
+)
 from rest_framework.response import Response
-
-from recipes.filters import IngredientFilter, RecipeFilter
-from recipes.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
-                            ShoppingCart, Tag)
-from recipes.serializers import (IngredientSerializer, RecipeReadSerializer,
-                                 RecipeSerializer, TagSerializer)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -56,7 +67,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, pk=pk)
         if recipe.favorited_by.filter(user=request.user).exists():
             return Response(
-                {"errors": "Уже в избранном"}, status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Уже в избранном"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         Favorite.objects.create(user=request.user, recipe=recipe)
         data = RecipeReadSerializer(recipe, context={"request": request}).data
@@ -68,7 +80,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         fav = recipe.favorited_by.filter(user=request.user)
         if not fav.exists():
             return Response(
-                {"errors": "Не в избранном"}, status=status.HTTP_400_BAD_REQUEST
+                {"errors": "Не в избранном"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         fav.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -99,14 +112,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart_list(self, request):
         qs = Recipe.objects.filter(shopping_carts__user=request.user)
         page = self.paginate_queryset(qs)
-        data = RecipeReadSerializer(page, many=True, context={"request": request}).data
+        data = RecipeReadSerializer(
+            page, many=True, context={"request": request}
+        ).data
         return self.get_paginated_response(data)
 
     @action(detail=False, methods=["get"], url_path="favorite")
     def favorite_list(self, request):
         qs = Recipe.objects.filter(favorited_by__user=request.user)
         page = self.paginate_queryset(qs)
-        data = RecipeReadSerializer(page, many=True, context={"request": request}).data
+        data = RecipeReadSerializer(
+            page, many=True, context={"request": request}
+        ).data
         return self.get_paginated_response(data)
 
     @action(detail=False, methods=["get"], url_path="download_shopping_cart")
@@ -122,12 +139,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for item in qs:
             name = item.ingredient.name
             unit = item.ingredient.measurement_unit
-            ingredients[(name, unit)] = ingredients.get((name, unit), 0) + item.amount
+            ingredients[(name, unit)] = (
+                ingredients.get((name, unit), 0) + item.amount
+            )
         content = ""
         for (name, unit), amount in ingredients.items():
             content += f"{name} — {amount} {unit}\n"
         resp = HttpResponse(content, content_type="text/plain")
-        resp["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
+        resp["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
         return resp
 
     @action(detail=True, methods=["get"], url_path="get_link")
