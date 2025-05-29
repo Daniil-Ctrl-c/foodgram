@@ -4,7 +4,9 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Загружаем переменные окружения из .env
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", ".env"))
+load_dotenv(
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", ".env")
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -78,8 +80,12 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
     },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
+    },
 ]
 
 LANGUAGE_CODE = "ru-ru"

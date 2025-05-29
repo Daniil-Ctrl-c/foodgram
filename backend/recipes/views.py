@@ -72,10 +72,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if add:
             if qs.exists():
                 return Response(
-                    {"errors": "Уже добавлено"}, status=status.HTTP_400_BAD_REQUEST
+                    {"errors": "Уже добавлено"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
             model.objects.create(**lookup)
-            data = RecipeReadSerializer(recipe, context={"request": request}).data
+            data = RecipeReadSerializer(
+                recipe, context={"request": request}
+            ).data
             return Response(data, status=status.HTTP_201_CREATED)
         deleted, _ = qs.delete()
         if not deleted:
@@ -104,25 +107,38 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart_list(self, request):
         qs = Recipe.objects.filter(shopping_carts__user=request.user)
         page = self.paginate_queryset(qs)
-        data = RecipeReadSerializer(page, many=True, context={"request": request}).data
+        data = RecipeReadSerializer(
+            page, many=True, context={"request": request}
+        ).data
         return self.get_paginated_response(data)
 
     @action(detail=False, methods=["get"], url_path="favorite")
     def favorite_list(self, request):
         qs = Recipe.objects.filter(favorited_by__user=request.user)
         page = self.paginate_queryset(qs)
-        data = RecipeReadSerializer(page, many=True, context={"request": request}).data
+        data = RecipeReadSerializer(
+            page, many=True, context={"request": request}
+        ).data
         return self.get_paginated_response(data)
 
     @action(detail=False, methods=["get"], url_path="download_shopping_cart")
     def download_shopping_cart(self, request):
         qs = (
-            IngredientInRecipe.objects.filter(recipe__shopping_carts__user=request.user)
-            .values(name=F("ingredient__name"), unit=F("ingredient__measurement_unit"))
+            IngredientInRecipe.objects.filter(
+                recipe__shopping_carts__user=request.user
+            )
+            .values(
+                name=F("ingredient__name"),
+                unit=F("ingredient__measurement_unit"),
+            )
             .annotate(total=Sum("amount"))
         )
-        lines = [f"{item['name']} — {item['total']} {item['unit']}" for item in qs]
+        lines = [
+            f"{item['name']} — {item['total']} {item['unit']}" for item in qs
+        ]
         content = "\n".join(lines)
         resp = HttpResponse(content, content_type="text/plain")
-        resp["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
+        resp["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
         return resp

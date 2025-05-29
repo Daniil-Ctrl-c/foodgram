@@ -45,12 +45,16 @@ class Migration(migrations.Migration):
                 (
                     "name",
                     models.CharField(
-                        max_length=200, unique=True, verbose_name="Название ингредиента"
+                        max_length=200,
+                        unique=True,
+                        verbose_name="Название ингредиента",
                     ),
                 ),
                 (
                     "measurement_unit",
-                    models.CharField(max_length=200, verbose_name="Единица измерения"),
+                    models.CharField(
+                        max_length=200, verbose_name="Единица измерения"
+                    ),
                 ),
             ],
             options={
@@ -73,7 +77,9 @@ class Migration(migrations.Migration):
                 (
                     "amount",
                     models.PositiveSmallIntegerField(
-                        validators=[django.core.validators.MinValueValidator(1)],
+                        validators=[
+                            django.core.validators.MinValueValidator(1)
+                        ],
                         verbose_name="Количество",
                     ),
                 ),
@@ -95,7 +101,10 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("name", models.CharField(max_length=200, verbose_name="Название")),
+                (
+                    "name",
+                    models.CharField(max_length=200, verbose_name="Название"),
+                ),
                 (
                     "image",
                     models.ImageField(
@@ -152,10 +161,15 @@ class Migration(migrations.Migration):
                 (
                     "name",
                     models.CharField(
-                        max_length=200, unique=True, verbose_name="Название тега"
+                        max_length=200,
+                        unique=True,
+                        verbose_name="Название тега",
                     ),
                 ),
-                ("color", models.CharField(max_length=7, verbose_name="Цвет (HEX)")),
+                (
+                    "color",
+                    models.CharField(max_length=7, verbose_name="Цвет (HEX)"),
+                ),
                 ("slug", models.SlugField(unique=True, verbose_name="Слаг")),
             ],
             options={

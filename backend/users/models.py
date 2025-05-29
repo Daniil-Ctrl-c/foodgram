@@ -4,11 +4,16 @@ from django.db import models
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True, max_length=254, verbose_name="Email")
+    email = models.EmailField(
+        unique=True, max_length=254, verbose_name="Email"
+    )
     first_name = models.CharField(max_length=150, verbose_name="Имя")
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
     avatar = models.ImageField(
-        upload_to="users/avatars/", blank=True, default="", verbose_name="Аватар"
+        upload_to="users/avatars/",
+        blank=True,
+        default="",
+        verbose_name="Аватар",
     )
 
     USERNAME_FIELD = "email"

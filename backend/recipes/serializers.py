@@ -10,7 +10,9 @@ from rest_framework import serializers
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
-        if isinstance(data, six.string_types) and data.startswith("data:image"):
+        if isinstance(data, six.string_types) and data.startswith(
+            "data:image"
+        ):
             header, imgstr = data.split(";base64,")
             ext = header.split("/")[-1]
             name = f"{uuid.uuid4().hex[:10]}.{ext}"
@@ -33,7 +35,9 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit"
+    )
 
     class Meta:
         model = IngredientInRecipe
@@ -83,13 +87,17 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context.get("request")
         return (
-            request.build_absolute_uri(obj.image.url) if obj.image and request else None
+            request.build_absolute_uri(obj.image.url)
+            if obj.image and request
+            else None
         )
 
     def get_is_favorited(self, obj):
         user = self.context.get("request").user
         return (
-            False if user.is_anonymous else obj.favorited_by.filter(user=user).exists()
+            False
+            if user.is_anonymous
+            else obj.favorited_by.filter(user=user).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
@@ -103,13 +111,22 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountWriteSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all()
+    )
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Recipe
-        fields = ("tags", "ingredients", "name", "image", "text", "cooking_time")
+        fields = (
+            "tags",
+            "ingredients",
+            "name",
+            "image",
+            "text",
+            "cooking_time",
+        )
 
     def _save_tags_and_ingredients(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
@@ -151,12 +168,14 @@ class RecipeSerializer(serializers.Serializer):
         return RecipeReadSerializer(instance, context=self.context).data
 
     def to_internal_value(self, data):
-        return RecipeWriteSerializer(data=data, context=self.context).run_validation(
-            data
-        )
+        return RecipeWriteSerializer(
+            data=data, context=self.context
+        ).run_validation(data)
 
     def create(self, validated_data):
-        return RecipeWriteSerializer(context=self.context).create(validated_data)
+        return RecipeWriteSerializer(context=self.context).create(
+            validated_data
+        )
 
     def update(self, instance, validated_data):
         return RecipeWriteSerializer(context=self.context).update(
