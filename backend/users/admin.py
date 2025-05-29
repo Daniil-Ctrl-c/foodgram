@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-
 from recipes.models import ShoppingCart
 from users.models import Subscription
 
@@ -18,9 +17,8 @@ class ShoppingCartInline(admin.TabularInline):
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    fieldsets = BaseUserAdmin.fieldsets + (
-        ("Дополнительно", {"fields": ("avatar",)}),
-    )
+    fieldsets = BaseUserAdmin.fieldsets + \
+        (("Дополнительно", {"fields": ("avatar",)}),)
     readonly_fields = ("avatar",)
     inlines = (ShoppingCartInline,)
     list_display = ("username", "email", "is_active", "is_staff", "avatar")

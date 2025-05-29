@@ -3,10 +3,13 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Загружаем переменные окружения из .env 
+# Загружаем переменные окружения из .env
 load_dotenv(
-    os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", ".env")
-)
+    os.path.join(
+        os.path.dirname(
+            os.path.dirname(__file__)),
+        "..",
+        ".env"))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,15 +27,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "rest_framework.authtoken",
     "django_filters",
     "djoser",
-
     # Приложения проекта
-    "users",        # модели и миграции пользователя
-    "recipes",      # API рецептов
+    "users",  # модели и миграции пользователя
+    "recipes",  # API рецептов
     # api.users НЕ указываем здесь, чтобы не дублировать AppConfig "users"
 ]
 
@@ -78,7 +79,9 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -120,9 +123,9 @@ DJOSER = {
     "LOGIN_FIELD": "email",
     "USER_CREATE_PASSWORD_RETYPE": False,
     "SERIALIZERS": {
-        "user_create":   "api.users.serializers.UserCreateSerializer",
-        "user":          "api.users.serializers.UserSerializer",
-        "current_user":  "api.users.serializers.UserSerializer",
+        "user_create": "api.users.serializers.UserCreateSerializer",
+        "user": "api.users.serializers.UserSerializer",
+        "current_user": "api.users.serializers.UserSerializer",
     },
 }
 

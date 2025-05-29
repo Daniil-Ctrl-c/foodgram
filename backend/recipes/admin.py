@@ -76,8 +76,7 @@ class RecipeAdmin(admin.ModelAdmin):
         writer.writerow(field_names)
         for obj in queryset:
             writer.writerow(
-                [obj.id, obj.name, obj.author.username, obj.cooking_time]
-            )
+                [obj.id, obj.name, obj.author.username, obj.cooking_time])
         return response
 
     export_to_csv.short_description = "Экспорт выбранных рецептов в CSV"

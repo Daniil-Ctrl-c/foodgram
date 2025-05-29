@@ -1,5 +1,5 @@
 from django_filters import rest_framework as filters
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import Ingredient, Recipe
 
 
 class RecipeFilter(filters.FilterSet):
@@ -17,7 +17,8 @@ class RecipeFilter(filters.FilterSet):
         if not user or user.is_anonymous:
             return queryset.none() if value else queryset
         qs = (
-            queryset.filter(favorited_by__user=user) if value
+            queryset.filter(favorited_by__user=user)
+            if value
             else queryset.exclude(favorited_by__user=user)
         )
         return qs.distinct()
@@ -27,7 +28,8 @@ class RecipeFilter(filters.FilterSet):
         if not user or user.is_anonymous:
             return queryset.none() if value else queryset
         qs = (
-            queryset.filter(shopping_carts__user=user) if value
+            queryset.filter(shopping_carts__user=user)
+            if value
             else queryset.exclude(shopping_carts__user=user)
         )
         return qs.distinct()
