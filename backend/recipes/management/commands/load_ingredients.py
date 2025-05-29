@@ -28,5 +28,6 @@ class Command(BaseCommand):
             if created:
                 created_count += 1
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Успешно загружено {created_count} ингредиентов"))
+        self.stdout.write(
+            self.style.SUCCESS(f"Успешно загружено {created_count} ингредиентов")
+        )

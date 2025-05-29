@@ -28,9 +28,10 @@ class UserSerializer(BaseUserSerializer):
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
         return bool(
-            request and not request.user.is_anonymous and Subscription.objects.filter(
-                user=request.user,
-                following=obj).exists())
+            request
+            and not request.user.is_anonymous
+            and Subscription.objects.filter(user=request.user, following=obj).exists()
+        )
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -63,8 +64,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         request = self.context.get("request")
         avatar = obj.following.avatar
-        return request.build_absolute_uri(
-            avatar.url) if avatar and request else None
+        return request.build_absolute_uri(avatar.url) if avatar and request else None
 
     def get_is_subscribed(self, obj):
         return True

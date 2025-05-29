@@ -35,8 +35,7 @@ class UserViewSet(BaseUserViewSet):
         serializer = UserSerializer(request.user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["post"],
-            permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
         """Оформить подписку."""
         serializer = SubscriptionSerializer(
@@ -45,10 +44,7 @@ class UserViewSet(BaseUserViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user)
         return Response(
-            UserSerializer(
-                self.get_object(),
-                context={
-                    "request": request}).data,
+            UserSerializer(self.get_object(), context={"request": request}).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -59,8 +55,9 @@ class UserViewSet(BaseUserViewSet):
             user=request.user, following_id=id
         ).delete()
         if not deleted:
-            return Response({"errors": "Вы не подписаны"},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"errors": "Вы не подписаны"}, status=status.HTTP_400_BAD_REQUEST
+            )
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -71,8 +68,7 @@ class UserViewSet(BaseUserViewSet):
     )
     def subscriptions(self, request):
         """Список моих подписок."""
-        qs = Subscription.objects.filter(
-            user=request.user).select_related("following")
+        qs = Subscription.objects.filter(user=request.user).select_related("following")
         page = self.paginate_queryset(qs)
         serializer = SubscriptionSerializer(
             page, many=True, context={"request": request}
@@ -102,8 +98,11 @@ class UserViewSet(BaseUserViewSet):
             file = ContentFile(b64decode(imgstr), name=f"avatar.{ext}")
             request.user.avatar = file
             request.user.save()
-            return Response({"avatar": request.build_absolute_uri(
-                request.user.avatar.url)}, status=status.HTTP_200_OK, )
+            return Response(
+                {"avatar": request.build_absolute_uri(request.user.avatar.url)},
+                status=status.HTTP_200_OK,
+            )
 
-        return Response({"errors": "Не передан файл avatar"},
-                        status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"errors": "Не передан файл avatar"}, status=status.HTTP_400_BAD_REQUEST
+        )

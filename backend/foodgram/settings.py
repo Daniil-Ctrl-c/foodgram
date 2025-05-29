@@ -4,12 +4,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Загружаем переменные окружения из .env
-load_dotenv(
-    os.path.join(
-        os.path.dirname(
-            os.path.dirname(__file__)),
-        "..",
-        ".env"))
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", ".env"))
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

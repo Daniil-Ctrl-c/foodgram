@@ -4,10 +4,7 @@ from django.db import models
 
 
 class Tag(models.Model):
-    name = models.CharField(
-        max_length=200,
-        unique=True,
-        verbose_name="Название тега")
+    name = models.CharField(max_length=200, unique=True, verbose_name="Название тега")
     color = models.CharField(max_length=7, verbose_name="Цвет (HEX)")
     slug = models.SlugField(unique=True, verbose_name="Слаг")
 
@@ -45,16 +42,13 @@ class Recipe(models.Model):
         verbose_name="Автор",
     )
     name = models.CharField(max_length=200, verbose_name="Название")
-    image = models.ImageField(
-        upload_to="recipes/images/",
-        verbose_name="Изображение")
+    image = models.ImageField(upload_to="recipes/images/", verbose_name="Изображение")
     text = models.TextField(verbose_name="Описание")
     cooking_time = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(1440)],
         verbose_name="Время приготовления (мин)",
     )
-    tags = models.ManyToManyField(
-        Tag, related_name="recipes", verbose_name="Теги")
+    tags = models.ManyToManyField(Tag, related_name="recipes", verbose_name="Теги")
     ingredients = models.ManyToManyField(
         Ingredient,
         through="IngredientInRecipe",
