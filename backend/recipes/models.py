@@ -5,7 +5,9 @@ from django.db import models
 
 class Tag(models.Model):
     name = models.CharField(
-        max_length=200, unique=True, verbose_name="Название тега"
+        max_length=200,
+        unique=True,
+        verbose_name="Название тега",
     )
     color = models.CharField(max_length=7, verbose_name="Цвет (HEX)")
     slug = models.SlugField(unique=True, verbose_name="Слаг")
@@ -21,10 +23,13 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=200, unique=True, verbose_name="Название ингредиента"
+        max_length=200,
+        unique=True,
+        verbose_name="Название ингредиента",
     )
     measurement_unit = models.CharField(
-        max_length=200, verbose_name="Единица измерения"
+        max_length=200,
+        verbose_name="Единица измерения",
     )
 
     class Meta:
@@ -45,15 +50,25 @@ class Recipe(models.Model):
     )
     name = models.CharField(max_length=200, verbose_name="Название")
     image = models.ImageField(
-        upload_to="recipes/images/", verbose_name="Изображение"
+        upload_to="recipes/images/",
+        verbose_name="Изображение",
     )
     text = models.TextField(verbose_name="Описание")
     cooking_time = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(1440)],
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(1440),
+        ],
         verbose_name="Время приготовления (мин)",
     )
+    created = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания",
+    )
     tags = models.ManyToManyField(
-        Tag, related_name="recipes", verbose_name="Теги"
+        Tag,
+        related_name="recipes",
+        verbose_name="Теги",
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -65,7 +80,7 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
-        ordering = ["-id"]
+        ordering = ["-created"]
 
     def __str__(self):
         return self.name
@@ -75,17 +90,21 @@ class IngredientInRecipe(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name="ingredientinrecipe_set",
+        related_name="ingredient_links",
         verbose_name="Рецепт",
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name="ingredientinrecipe_set",
+        related_name="recipe_links",
         verbose_name="Ингредиент",
     )
     amount = models.PositiveSmallIntegerField(
-        validators=[MinValueValidator(1)], verbose_name="Количество"
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(10000),
+        ],
+        verbose_name="Количество",
     )
 
     class Meta:
@@ -94,7 +113,7 @@ class IngredientInRecipe(models.Model):
         unique_together = ("recipe", "ingredient")
 
     def __str__(self):
-        return f"{self.ingredient} в {self.recipe}: {self.amount}"
+        return f"{self.ingredient} – {self.amount} (в {self.recipe})"
 
 
 class RecipeRelation(models.Model):
@@ -103,7 +122,14 @@ class RecipeRelation(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
+        related_name="%(class)s",
         verbose_name="Пользователь",
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name="%(class)s",
+        verbose_name="Рецепт",
     )
 
     class Meta:
@@ -112,33 +138,19 @@ class RecipeRelation(models.Model):
 
 
 class Favorite(RecipeRelation):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name="favorited_by",
-        verbose_name="Рецепт",
-    )
-
     class Meta(RecipeRelation.Meta):
         verbose_name = "Избранное"
         verbose_name_plural = "Избранные рецепты"
 
     def __str__(self):
-        return f"{self.user} добавил {self.recipe} в избранное"
+        return f"{self.user} → избранное → {self.recipe}"
 
 
 class ShoppingCart(RecipeRelation):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name="shopping_carts",
-        verbose_name="Рецепт",
-    )
-
     class Meta(RecipeRelation.Meta):
         db_table = "recipes_cart"
         verbose_name = "Корзина"
         verbose_name_plural = "Корзины"
 
     def __str__(self):
-        return f"{self.user} добавил {self.recipe} в корзину"
+        return f"{self.user} → корзина → {self.recipe}"

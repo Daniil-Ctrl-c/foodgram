@@ -3,15 +3,15 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Загружаем переменные окружения из .env
-load_dotenv(
-    os.path.join(os.path.dirname(os.path.dirname(__file__)), "..", ".env")
-)
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Автоматический выбор .env или .env.dev
+ENV_MODE = os.getenv("ENV", "prod")  # можно переопределить через ENV=dev
+env_file = BASE_DIR / (".env.dev" if ENV_MODE == "dev" else ".env")
+load_dotenv(dotenv_path=env_file)
+
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "!!!you-forgot-secret-key!!!")
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
+DEBUG = True
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 INSTALLED_APPS = [
@@ -29,9 +29,8 @@ INSTALLED_APPS = [
     "django_filters",
     "djoser",
     # Приложения проекта
-    "users",  # модели и миграции пользователя
-    "recipes",  # API рецептов
-    # api.users НЕ указываем здесь, чтобы не дублировать AppConfig "users"
+    "users",
+    "recipes",
 ]
 
 MIDDLEWARE = [
@@ -76,16 +75,10 @@ DATABASES = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
-    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
 LANGUAGE_CODE = "ru-ru"
