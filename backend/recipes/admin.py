@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from rangefilter.filters import NumericRangeFilter
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -37,8 +36,8 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "tags",
-        ("cooking_time", NumericRangeFilter),
         "author",
+        # "cooking_time",  # оставим обычный числовой фильтр, без range
     )
     search_fields = ("name", "author__username")
     autocomplete_fields = ("tags",)
@@ -66,7 +65,6 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def export_to_csv(self, request, queryset):
         import csv
-
         from django.http import HttpResponse
 
         field_names = ["id", "name", "author", "cooking_time"]

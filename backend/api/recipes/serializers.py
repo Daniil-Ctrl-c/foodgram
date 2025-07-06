@@ -27,7 +27,7 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
-# ─────────────────────────────── Теги и ингредиенты ────────────────────────────
+# ────────────────── Теги и ингредиенты ──────────────────
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -53,16 +53,16 @@ class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
 
 
 class IngredientAmountWriteSerializer(serializers.ModelSerializer):
-    ingredient = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all()
+    id = serializers.PrimaryKeyRelatedField(
+        source="ingredient", queryset=Ingredient.objects.all()
     )
 
     class Meta:
         model = IngredientInRecipe
-        fields = ("ingredient", "amount")
+        fields = ("id", "amount")
 
 
-# ─────────────────────────────── Чтение рецептов ──────────────────────────────
+# ────────────────── Чтение рецептов ──────────────────
 class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
@@ -88,10 +88,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             "is_in_shopping_cart",
         )
 
-    # Автор берём через users.serializers, чтобы не плодить круговые импорты
     def get_author(self, obj):
         from api.users.serializers import UserSerializer
-
         return UserSerializer(obj.author, context=self.context).data
 
     def get_image(self, obj):
@@ -117,7 +115,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
 
-# ─────────────────────────────── Запись рецептов ──────────────────────────────
+# ────────────────── Запись рецептов ──────────────────
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountWriteSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
@@ -135,11 +133,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             "cooking_time",
         )
 
-    # Вынесена логика сохранения тегов и ингредиентов
     def _save_tags_and_ingredients(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
         recipe.ingredient_links.all().delete()
-
         bulk = [
             IngredientInRecipe(
                 recipe=recipe,
@@ -153,7 +149,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
-
         recipe = Recipe.objects.create(
             author=self.context["request"].user, **validated_data
         )
@@ -163,10 +158,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tags = validated_data.pop("tags", None)
         ingredients = validated_data.pop("ingredients", None)
-
-        # Всё, кроме тегов/ингредиентов, обновляем стандартным способом
         instance = super().update(instance, validated_data)
-
         if tags is not None or ingredients is not None:
             self._save_tags_and_ingredients(
                 instance,
@@ -176,10 +168,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ─────────────────────────────── Универсальный фасад ──────────────────────────
+# ────────────────── Универсальный фасад ──────────────────
 class RecipeSerializer(serializers.Serializer):
-    """Фасад-сериализатор: отдаёт read-вариант, принимает write-данные."""
-
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
 
@@ -197,10 +187,8 @@ class RecipeSerializer(serializers.Serializer):
         )
 
 
-# ──────────────────────── Сериализаторы для связей «рецепт‒юзер» ──────────────
+# ────────────────── Сериализаторы для связей «рецепт−юзер» ──────────────────
 class _RelationBaseSerializer(serializers.ModelSerializer):
-    """Базовый сериализатор для Favorite / ShoppingCart."""
-
     class Meta:
         fields = ("id",)
         extra_kwargs = {"id": {"write_only": True}}
@@ -211,7 +199,6 @@ class _RelationBaseSerializer(serializers.ModelSerializer):
         attrs["recipe"] = recipe
         user = self.context["request"].user
         attrs["user"] = user
-
         model = self.Meta.model
         if model.objects.filter(user=user, recipe=recipe).exists():
             raise serializers.ValidationError("Уже добавлено")
