@@ -15,7 +15,7 @@ class RecipeFilter(filters.FilterSet):
         model = Recipe
         fields = ("tags", "author", "is_favorited", "is_in_shopping_cart")
 
-    # --- избранное ----------------------------------------------------------
+    # --- избранное --------------------------------------------------------
     def filter_favorited(self, queryset, name, value):
         """
         true  -> вернуть рецепты, которые пользователь добавил в избранное
@@ -33,7 +33,7 @@ class RecipeFilter(filters.FilterSet):
             else queryset.exclude(**lookup)
         ).distinct()
 
-    # --- корзина ------------------------------------------------------------
+    # --- корзина ----------------------------------------------------------
     def filter_shopping_cart(self, queryset, name, value):
         """
         true  -> рецепты, находящиеся в корзине пользователя

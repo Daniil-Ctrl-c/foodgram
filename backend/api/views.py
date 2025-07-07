@@ -27,7 +27,7 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from users.models import Subscription, User
 
-# ─────────────────────────────── Пользователи ───────────────────────────────
+# ─────────────────────────────── Пользователи ───────────────────────────
 
 
 class UserViewSet(BaseUserViewSet):
@@ -234,7 +234,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             for item in items
         )
 
-    @action(detail=False, methods=["get"], url_path="download_shopping_cart")
+    @action(detail=False, methods=["get"],
+            url_path="download_shopping_cart")
     def download_shopping_cart(self, request):
         content = self._build_shopping_list_text(request)
         response = HttpResponse(content, content_type="text/plain")

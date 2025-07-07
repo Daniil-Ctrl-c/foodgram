@@ -233,7 +233,10 @@ class UserSerializer(BaseUserSerializer):
 
     class Meta(BaseUserSerializer.Meta):
         model = User
-        fields = (*BaseUserSerializer.Meta.fields, "avatar", "is_subscribed")
+        fields = (
+            *BaseUserSerializer.Meta.fields,
+            "avatar",
+            "is_subscribed")
 
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
@@ -302,7 +305,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         qs = obj.following.recipes.all()[:3]
-        return RecipeReadSerializer(qs, many=True, context=self.context).data
+        return RecipeReadSerializer(
+            qs, many=True, context=self.context).data
 
 
 # ──────────────────────────── Аватар ────────────────────────────────────
