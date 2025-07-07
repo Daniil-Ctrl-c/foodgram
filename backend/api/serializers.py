@@ -23,11 +23,13 @@ from users.models import Subscription, User
 
 # ──────────────────────────── base64 image ──────────────────────────────
 
+
 class Base64ImageField(serializers.ImageField):
     """Принимает изображение в формате base64 и сохраняет как ImageField."""
 
     def to_internal_value(self, data):
-        if isinstance(data, six.string_types) and data.startswith("data:image"):
+        if isinstance(data, six.string_types) and data.startswith(
+                "data:image"):
             header, imgstr = data.split(";base64,")
             ext = header.split("/")[-1]
             name = f"{uuid.uuid4().hex[:10]}.{ext}"
@@ -52,7 +54,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
-    measurement_unit = serializers.ReadOnlyField(source="ingredient.measurement_unit")
+    measurement_unit = serializers.ReadOnlyField(
+        source="ingredient.measurement_unit")
 
     class Meta:
         model = IngredientInRecipe
@@ -74,7 +77,8 @@ class IngredientAmountWriteSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
-    ingredients = IngredientInRecipeReadSerializer(source="ingredient_links", many=True, read_only=True)
+    ingredients = IngredientInRecipeReadSerializer(
+        source="ingredient_links", many=True, read_only=True)
     image = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -99,28 +103,38 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         request = self.context.get("request")
-        return request.build_absolute_uri(obj.image.url) if obj.image and request else None
+        return request.build_absolute_uri(
+            obj.image.url) if obj.image and request else None
 
     def get_is_favorited(self, obj):
         user = self.context.get("request").user
-        return False if user.is_anonymous else obj.favorite.filter(user=user).exists()
+        return False if user.is_anonymous else obj.favorite.filter(
+            user=user).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context.get("request").user
-        return False if user.is_anonymous else obj.shoppingcart.filter(user=user).exists()
+        return False if user.is_anonymous else obj.shoppingcart.filter(
+            user=user).exists()
 
 
 # ─────────────────────────────── Запись рецептов ────────────────────────
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountWriteSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all())
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Recipe
-        fields = ("tags", "ingredients", "name", "image", "text", "cooking_time")
+        fields = (
+            "tags",
+            "ingredients",
+            "name",
+            "image",
+            "text",
+            "cooking_time")
 
     def _save_tags_and_ingredients(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
@@ -133,7 +147,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
-        recipe = Recipe.objects.create(author=self.context["request"].user, **validated_data)
+        recipe = Recipe.objects.create(
+            author=self.context["request"].user,
+            **validated_data)
         self._save_tags_and_ingredients(recipe, tags, ingredients)
         return recipe
 
@@ -156,13 +172,18 @@ class RecipeSerializer(serializers.Serializer):
         return RecipeReadSerializer(instance, context=self.context).data
 
     def to_internal_value(self, data):
-        return RecipeWriteSerializer(data=data, context=self.context).run_validation(data)
+        return RecipeWriteSerializer(
+            data=data, context=self.context).run_validation(data)
 
     def create(self, validated_data):
-        return RecipeWriteSerializer(context=self.context).create(validated_data)
+        return RecipeWriteSerializer(
+            context=self.context).create(validated_data)
 
     def update(self, instance, validated_data):
-        return RecipeWriteSerializer(context=self.context).update(instance, validated_data)
+        return RecipeWriteSerializer(
+            context=self.context).update(
+            instance,
+            validated_data)
 
 
 # ──────────────────────── Сериализаторы для связей «рецепт‒юзер» ────────
@@ -226,7 +247,8 @@ class UserSerializer(BaseUserSerializer):
 # ──────────────────────── Подписки (создание / вывод) ───────────────────
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
-    following = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), write_only=True)
+    following = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), write_only=True)
 
     class Meta:
         model = Subscription
@@ -237,7 +259,8 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         following = attrs["following"]
         if user == following:
             raise serializers.ValidationError("Нельзя подписаться на себя")
-        if Subscription.objects.filter(user=user, following=following).exists():
+        if Subscription.objects.filter(
+                user=user, following=following).exists():
             raise serializers.ValidationError("Уже подписаны")
         attrs["user"] = user
         return attrs
@@ -271,7 +294,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         request = self.context.get("request")
         avatar = obj.following.avatar
-        return request.build_absolute_uri(avatar.url) if avatar and request else None
+        return request.build_absolute_uri(
+            avatar.url) if avatar and request else None
 
     def get_is_subscribed(self, obj):
         return True

@@ -29,6 +29,7 @@ from users.models import Subscription, User
 
 # ─────────────────────────────── Пользователи ───────────────────────────────
 
+
 class UserViewSet(BaseUserViewSet):
     """Пользователи + подписки + аватар."""
 
@@ -46,17 +47,22 @@ class UserViewSet(BaseUserViewSet):
     def me(self, request):
         if request.user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        serializer = UserSerializer(request.user, context={"request": request})
+        serializer = UserSerializer(
+            request.user, context={
+                "request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=["post"],
+            permission_classes=[IsAuthenticated])
     def subscribe(self, request, id=None):
         serializer = SubscriptionCreateSerializer(
             data={"following": id}, context={"request": request}
         )
         serializer.is_valid(raise_exception=True)
         subscription = serializer.save()
-        output = SubscriptionSerializer(subscription, context={"request": request})
+        output = SubscriptionSerializer(
+            subscription, context={
+                "request": request})
         return Response(output.data, status=status.HTTP_201_CREATED)
 
     @subscribe.mapping.delete
@@ -97,7 +103,9 @@ class UserViewSet(BaseUserViewSet):
     )
     def avatar(self, request):
         if request.method == "GET":
-            serializer = AvatarSerializer(request.user, context={"request": request})
+            serializer = AvatarSerializer(
+                request.user, context={
+                    "request": request})
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         serializer = AvatarSerializer(
@@ -111,7 +119,7 @@ class UserViewSet(BaseUserViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# ─────────────────────────────── Теги и ингредиенты ──────────────────────────
+# ─────────────────────────────── Теги и ингредиенты ─────────────────────
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
@@ -127,7 +135,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-# ─────────────────────────────── Рецепты ─────────────────────────────────────
+# ─────────────────────────────── Рецепты ────────────────────────────────
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.select_related("author").prefetch_related(
@@ -174,32 +182,40 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def favorite(self, request, pk=None):
-        return self._modify_relation(FavoriteCreateSerializer, request, pk, add=True)
+        return self._modify_relation(
+            FavoriteCreateSerializer, request, pk, add=True)
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
-        return self._modify_relation(FavoriteCreateSerializer, request, pk, add=False)
+        return self._modify_relation(
+            FavoriteCreateSerializer, request, pk, add=False)
 
     @action(detail=True, methods=["post"])
     def shopping_cart(self, request, pk=None):
-        return self._modify_relation(ShoppingCartCreateSerializer, request, pk, add=True)
+        return self._modify_relation(
+            ShoppingCartCreateSerializer, request, pk, add=True)
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
-        return self._modify_relation(ShoppingCartCreateSerializer, request, pk, add=False)
+        return self._modify_relation(
+            ShoppingCartCreateSerializer, request, pk, add=False)
 
     @action(detail=False, methods=["get"], url_path="shopping_cart")
     def shopping_cart_list(self, request):
         qs = Recipe.objects.filter(shoppingcart__user=request.user)
         page = self.paginate_queryset(qs)
-        data = RecipeReadSerializer(page, many=True, context={"request": request}).data
+        data = RecipeReadSerializer(
+            page, many=True, context={
+                "request": request}).data
         return self.get_paginated_response(data)
 
     @action(detail=False, methods=["get"], url_path="favorite")
     def favorite_list(self, request):
         qs = Recipe.objects.filter(favorite__user=request.user)
         page = self.paginate_queryset(qs)
-        data = RecipeReadSerializer(page, many=True, context={"request": request}).data
+        data = RecipeReadSerializer(
+            page, many=True, context={
+                "request": request}).data
         return self.get_paginated_response(data)
 
     def _build_shopping_list_text(self, request):
