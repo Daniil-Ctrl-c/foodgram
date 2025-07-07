@@ -12,27 +12,38 @@ class RecipeFilter(filters.FilterSet):
         model = Recipe
         fields = ("tags", "author", "is_favorited", "is_in_shopping_cart")
 
+    # --- избранное ----------------------------------------------------------
     def filter_favorited(self, queryset, name, value):
+        """
+        true  -> вернуть рецепты, которые пользователь добавил в избранное  
+        false -> исключить такие рецепты
+        """
         user = getattr(self.request, "user", None)
-        if not user or user.is_anonymous:
+        if user is None or user.is_anonymous:
+            # гость → избранных/корзины быть не может
             return queryset.none() if value else queryset
-        qs = (
-            queryset.filter(favorited_by__user=user)
-            if value
-            else queryset.exclude(favorited_by__user=user)
-        )
-        return qs.distinct()
 
+        lookup = {"favorite__user": user}
+        return (
+            queryset.filter(**lookup)     if value
+            else queryset.exclude(**lookup)
+        ).distinct()
+
+    # --- корзина ------------------------------------------------------------
     def filter_shopping_cart(self, queryset, name, value):
+        """
+        true  -> рецепты, находящиеся в корзине пользователя  
+        false -> рецепты, не находящиеся в корзине
+        """
         user = getattr(self.request, "user", None)
-        if not user or user.is_anonymous:
+        if user is None or user.is_anonymous:
             return queryset.none() if value else queryset
-        qs = (
-            queryset.filter(shopping_carts__user=user)
-            if value
-            else queryset.exclude(shopping_carts__user=user)
-        )
-        return qs.distinct()
+
+        lookup = {"shoppingcart__user": user}
+        return (
+            queryset.filter(**lookup)     if value
+            else queryset.exclude(**lookup)
+        ).distinct()
 
 
 class IngredientFilter(filters.FilterSet):

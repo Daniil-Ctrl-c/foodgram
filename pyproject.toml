@@ -1,0 +1,44 @@
+[tool.black]
+line-length = 79
+target-version = ["py39"]
+exclude = '''
+/(
+    venv|
+    env|
+    .*__pycache__|
+    migrations|
+    manage\.py
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 79
+multi_line_output = 3
+include_trailing_comma = true
+skip = ["venv", "migrations", "__pycache__"]
+
+# ---------------------------  RUFF  ---------------------------------
+[tool.ruff]
+# Берём те же 79 символов и игнор-список из Flake8
+line-length = 79
+exclude = [
+    "tests",
+    "**/migrations/*",
+    "data",
+    "venv",
+    "env",
+    "docs",
+    "frontend",
+    "infra",
+    "__pycache__",
+    "manage.py",
+]
+
+# Включаем все «базовые» наборы правил, но глушим что вы игнорировали
+select = ["E", "W", "F", "I", "N", "D"]   # E/W/F – pep8/pyflakes, I – isort, N – pep8-naming, D – docstrings
+ignore = ["E203", "W503", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
+
+# Авто-фиксы (ruff format + ruff --fix) будут удалять неиспользуемые импорты/переменные
+fix = true
+show-fixes = true

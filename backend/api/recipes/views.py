@@ -49,7 +49,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
-    # — permissions на отдельные экшены —
     def get_permissions(self):
         if self.action in (
             "create",

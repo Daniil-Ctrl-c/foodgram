@@ -109,7 +109,7 @@ class AvatarSerializer(serializers.ModelSerializer):
         model = User
         fields = ("avatar",)
 
-    # полное URL вместо относительного
+
     def to_representation(self, instance):
         request = self.context.get("request")
         avatar = instance.avatar

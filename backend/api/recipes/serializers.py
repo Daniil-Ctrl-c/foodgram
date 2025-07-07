@@ -27,7 +27,8 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
-# ────────────────── Теги и ингредиенты ──────────────────
+# ─────────────────────────────── Теги и ингредиенты ────────────────────────────
+
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
@@ -62,10 +63,12 @@ class IngredientAmountWriteSerializer(serializers.ModelSerializer):
         fields = ("id", "amount")
 
 
-# ────────────────── Чтение рецептов ──────────────────
+# ─────────────────────────────── Чтение рецептов ──────────────────────────────
+
 class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
+    # related_name у IngredientInRecipe(recipe) = "ingredient_links"
     ingredients = IngredientInRecipeReadSerializer(
         source="ingredient_links", many=True, read_only=True
     )
@@ -99,26 +102,28 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
     def get_is_favorited(self, obj):
-        user = self.context["request"].user
+        user = self.context.get("request").user
+        # related_name у Recipe->Favorite = "favorite"
         return (
-            False
-            if user.is_anonymous
+            False if user.is_anonymous
             else obj.favorite.filter(user=user).exists()
         )
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context["request"].user
+        user = self.context.get("request").user
         return (
-            False
-            if user.is_anonymous
+            False if user.is_anonymous
             else obj.shoppingcart.filter(user=user).exists()
         )
 
 
-# ────────────────── Запись рецептов ──────────────────
+# ─────────────────────────────── Запись рецептов ──────────────────────────────
+
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountWriteSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(many=True, queryset=Tag.objects.all())
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Tag.objects.all()
+    )
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(min_value=1)
 
@@ -135,16 +140,16 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 
     def _save_tags_and_ingredients(self, recipe, tags, ingredients):
         recipe.tags.set(tags)
+        # related_name у IngredientInRecipe(recipe) = "ingredient_links"
         recipe.ingredient_links.all().delete()
-        bulk = [
+        IngredientInRecipe.objects.bulk_create([
             IngredientInRecipe(
                 recipe=recipe,
                 ingredient=item["ingredient"],
                 amount=item["amount"],
             )
             for item in ingredients
-        ]
-        IngredientInRecipe.objects.bulk_create(bulk)
+        ])
 
     def create(self, validated_data):
         tags = validated_data.pop("tags")
@@ -159,16 +164,16 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         tags = validated_data.pop("tags", None)
         ingredients = validated_data.pop("ingredients", None)
         instance = super().update(instance, validated_data)
-        if tags is not None or ingredients is not None:
-            self._save_tags_and_ingredients(
-                instance,
-                tags or instance.tags.all(),
-                ingredients or [],
-            )
+        self._save_tags_and_ingredients(
+            instance,
+            tags or instance.tags.all(),
+            ingredients or [],
+        )
         return instance
 
 
-# ────────────────── Универсальный фасад ──────────────────
+# ─────────────────────────────── Универсальный фасад ──────────────────────────
+
 class RecipeSerializer(serializers.Serializer):
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
@@ -187,8 +192,11 @@ class RecipeSerializer(serializers.Serializer):
         )
 
 
-# ────────────────── Сериализаторы для связей «рецепт−юзер» ──────────────────
+# ──────────────────────── Сериализаторы для связей «рецепт‒юзер» ──────────────
+
 class _RelationBaseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(write_only=True)
+
     class Meta:
         fields = ("id",)
         extra_kwargs = {"id": {"write_only": True}}

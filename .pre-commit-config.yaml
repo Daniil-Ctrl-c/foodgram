@@ -1,0 +1,17 @@
+# .pre-commit-config.yaml — кладём в корень репо
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit   # линтер
+    rev: v0.4.4       # версия Ruff
+    hooks:
+      - id: ruff
+        args: [--fix] # сразу чинит (удалит импорты, поменяет кавычки и т.д.)
+
+  - repo: https://github.com/psf/black                    # форматтер
+    rev: 24.4.2
+    hooks:
+      - id: black
+
+  - repo: https://github.com/pycqa/isort                  # сортировка импортов
+    rev: 5.13.2
+    hooks:
+      - id: isort
