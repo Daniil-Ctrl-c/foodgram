@@ -33,7 +33,9 @@ class UserViewSet(BaseUserViewSet):
     def me(self, request):
         if request.user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        serializer = UserSerializer(request.user, context={"request": request})
+        serializer = UserSerializer(
+            request.user, context={"request": request}
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # ──────────────── подписка / отписка ──────────────────────────────────────

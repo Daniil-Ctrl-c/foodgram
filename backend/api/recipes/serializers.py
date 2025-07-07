@@ -1,7 +1,6 @@
 import base64
 import uuid
 
-import six
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from recipes.models import (
@@ -13,6 +12,7 @@ from recipes.models import (
     Tag,
 )
 from rest_framework import serializers
+import six
 
 
 class Base64ImageField(serializers.ImageField):

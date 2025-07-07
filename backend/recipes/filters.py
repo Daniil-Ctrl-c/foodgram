@@ -6,7 +6,9 @@ class RecipeFilter(filters.FilterSet):
     tags = filters.BaseInFilter(field_name="tags__slug", lookup_expr="in")
     author = filters.NumberFilter(field_name="author__id")
     is_favorited = filters.BooleanFilter(method="filter_favorited")
-    is_in_shopping_cart = filters.BooleanFilter(method="filter_shopping_cart")
+    is_in_shopping_cart = filters.BooleanFilter(
+        method="filter_shopping_cart"
+    )
 
     class Meta:
         model = Recipe
@@ -25,7 +27,9 @@ class RecipeFilter(filters.FilterSet):
 
         lookup = {"favorite__user": user}
         return (
-            queryset.filter(**lookup) if value else queryset.exclude(**lookup)
+            queryset.filter(**lookup)
+            if value
+            else queryset.exclude(**lookup)
         ).distinct()
 
     # --- корзина ------------------------------------------------------------
@@ -40,7 +44,9 @@ class RecipeFilter(filters.FilterSet):
 
         lookup = {"shoppingcart__user": user}
         return (
-            queryset.filter(**lookup) if value else queryset.exclude(**lookup)
+            queryset.filter(**lookup)
+            if value
+            else queryset.exclude(**lookup)
         ).distinct()
 
 

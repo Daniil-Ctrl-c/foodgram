@@ -1,5 +1,7 @@
 from api.recipes.serializers import Base64ImageField
-from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from djoser.serializers import (
+    UserCreateSerializer as BaseUserCreateSerializer,
+)
 from djoser.serializers import UserSerializer as BaseUserSerializer
 from rest_framework import serializers
 from users.models import Subscription, User
@@ -24,7 +26,11 @@ class UserSerializer(BaseUserSerializer):
 
     class Meta(BaseUserSerializer.Meta):
         model = User
-        fields = (*BaseUserSerializer.Meta.fields, "avatar", "is_subscribed")
+        fields = (
+            *BaseUserSerializer.Meta.fields,
+            "avatar",
+            "is_subscribed",
+        )
 
     def get_is_subscribed(self, obj):
         request = self.context.get("request")
@@ -106,7 +112,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         from api.recipes.serializers import RecipeReadSerializer
 
         qs = obj.following.recipes.all()[:3]
-        return RecipeReadSerializer(qs, many=True, context=self.context).data
+        return RecipeReadSerializer(
+            qs, many=True, context=self.context
+        ).data
 
 
 # ──────────────────────────── Аватар ──────────────────────────────────────────

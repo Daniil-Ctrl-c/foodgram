@@ -12,7 +12,9 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         data_file = Path(settings.BASE_DIR) / "data" / "ingredients.json"
         if not data_file.exists():
-            self.stderr.write(self.style.ERROR(f"Файл не найден: {data_file}"))
+            self.stderr.write(
+                self.style.ERROR(f"Файл не найден: {data_file}")
+            )
             return
 
         with data_file.open("r", encoding="utf-8") as f:

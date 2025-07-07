@@ -10,12 +10,7 @@ from django.db.models import F, Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.filters import IngredientFilter, RecipeFilter
-from recipes.models import (
-    Ingredient,
-    IngredientInRecipe,
-    Recipe,
-    Tag,
-)
+from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (
@@ -156,6 +151,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         return response
 
-    @action(detail=False, methods=["get"], url_path="download_shopping_cart")
+    @action(
+        detail=False, methods=["get"], url_path="download_shopping_cart"
+    )
     def download_shopping_cart(self, request):
         return self._build_shopping_list(request)
