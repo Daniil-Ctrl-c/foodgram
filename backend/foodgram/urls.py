@@ -9,10 +9,8 @@ urlpatterns = [
     path("grappelli/", include("grappelli.urls")),
     # Стандартная админка
     path("admin/", admin.site.urls),
-    # API пользователей и подписок
-    path("api/users/", include("api.users.urls")),
-    # API рецептов
-    path("api/", include("api.recipes.urls")),
+    # Единый API (и пользователи, и рецепты)
+    path("api/", include("api.urls")),
     # Djoser аутентификация
     path("api/auth/", include("djoser.urls")),
     path("api/auth/", include("djoser.urls.authtoken")),
