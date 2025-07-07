@@ -65,6 +65,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def export_to_csv(self, request, queryset):
         import csv
+
         from django.http import HttpResponse
 
         field_names = ["id", "name", "author", "cooking_time"]

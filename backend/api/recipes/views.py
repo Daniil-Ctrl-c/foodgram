@@ -1,4 +1,3 @@
-
 from api.recipes.serializers import (
     FavoriteCreateSerializer,
     IngredientSerializer,
@@ -91,19 +90,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def favorite(self, request, pk=None):
-        return self._modify_relation(FavoriteCreateSerializer, request, pk, add=True)
+        return self._modify_relation(
+            FavoriteCreateSerializer, request, pk, add=True
+        )
 
     @favorite.mapping.delete
     def delete_favorite(self, request, pk=None):
-        return self._modify_relation(FavoriteCreateSerializer, request, pk, add=False)
+        return self._modify_relation(
+            FavoriteCreateSerializer, request, pk, add=False
+        )
 
     @action(detail=True, methods=["post"])
     def shopping_cart(self, request, pk=None):
-        return self._modify_relation(ShoppingCartCreateSerializer, request, pk, add=True)
+        return self._modify_relation(
+            ShoppingCartCreateSerializer, request, pk, add=True
+        )
 
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk=None):
-        return self._modify_relation(ShoppingCartCreateSerializer, request, pk, add=False)
+        return self._modify_relation(
+            ShoppingCartCreateSerializer, request, pk, add=False
+        )
 
     # ─────────────────────────── списки избранное / корзина ──────────────────
     @action(detail=False, methods=["get"], url_path="shopping_cart")
@@ -128,17 +135,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def _build_shopping_list(self, request):
         """Формирует txt-файл со списком покупок."""
         items = (
-            IngredientInRecipe.objects.filter(recipe__shoppingcart__user=request.user)
+            IngredientInRecipe.objects.filter(
+                recipe__shoppingcart__user=request.user
+            )
             .values(
                 name=F("ingredient__name"),
                 unit=F("ingredient__measurement_unit"),
             )
             .annotate(total=Sum("amount"))
         )
-        lines = [f"{item['name']} — {item['total']} {item['unit']}" for item in items]
+        lines = [
+            f"{item['name']} — {item['total']} {item['unit']}"
+            for item in items
+        ]
         content = "\n".join(lines)
         response = HttpResponse(content, content_type="text/plain")
-        response["Content-Disposition"] = 'attachment; filename="shopping_list.txt"'
+        response["Content-Disposition"] = (
+            'attachment; filename="shopping_list.txt"'
+        )
         return response
 
     @action(detail=False, methods=["get"], url_path="download_shopping_cart")

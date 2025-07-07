@@ -15,7 +15,7 @@ class RecipeFilter(filters.FilterSet):
     # --- избранное ----------------------------------------------------------
     def filter_favorited(self, queryset, name, value):
         """
-        true  -> вернуть рецепты, которые пользователь добавил в избранное  
+        true  -> вернуть рецепты, которые пользователь добавил в избранное
         false -> исключить такие рецепты
         """
         user = getattr(self.request, "user", None)
@@ -25,14 +25,13 @@ class RecipeFilter(filters.FilterSet):
 
         lookup = {"favorite__user": user}
         return (
-            queryset.filter(**lookup)     if value
-            else queryset.exclude(**lookup)
+            queryset.filter(**lookup) if value else queryset.exclude(**lookup)
         ).distinct()
 
     # --- корзина ------------------------------------------------------------
     def filter_shopping_cart(self, queryset, name, value):
         """
-        true  -> рецепты, находящиеся в корзине пользователя  
+        true  -> рецепты, находящиеся в корзине пользователя
         false -> рецепты, не находящиеся в корзине
         """
         user = getattr(self.request, "user", None)
@@ -41,8 +40,7 @@ class RecipeFilter(filters.FilterSet):
 
         lookup = {"shoppingcart__user": user}
         return (
-            queryset.filter(**lookup)     if value
-            else queryset.exclude(**lookup)
+            queryset.filter(**lookup) if value else queryset.exclude(**lookup)
         ).distinct()
 
 

@@ -1,4 +1,3 @@
-
 from api.users.serializers import (
     AvatarSerializer,
     SubscriptionCreateSerializer,
@@ -38,7 +37,9 @@ class UserViewSet(BaseUserViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # ──────────────── подписка / отписка ──────────────────────────────────────
-    @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
+    @action(
+        detail=True, methods=["post"], permission_classes=[IsAuthenticated]
+    )
     def subscribe(self, request, id=None):
         serializer = SubscriptionCreateSerializer(
             data={"following": id}, context={"request": request}
@@ -77,7 +78,9 @@ class UserViewSet(BaseUserViewSet):
             .annotate(recipes_count=Count("following__recipes"))
         )
         page = self.paginate_queryset(qs)
-        serializer = SubscriptionSerializer(page, many=True, context={"request": request})
+        serializer = SubscriptionSerializer(
+            page, many=True, context={"request": request}
+        )
         return self.get_paginated_response(serializer.data)
 
     # ────────────────────────────────── аватар ───────────────────────────────
@@ -89,7 +92,9 @@ class UserViewSet(BaseUserViewSet):
     )
     def avatar(self, request):
         if request.method == "GET":
-            serializer = AvatarSerializer(request.user, context={"request": request})
+            serializer = AvatarSerializer(
+                request.user, context={"request": request}
+            )
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         serializer = AvatarSerializer(

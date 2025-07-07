@@ -31,7 +31,9 @@ class UserSerializer(BaseUserSerializer):
         return (
             False
             if not request or request.user.is_anonymous
-            else Subscription.objects.filter(user=request.user, following=obj).exists()
+            else Subscription.objects.filter(
+                user=request.user, following=obj
+            ).exists()
         )
 
 
@@ -52,7 +54,9 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         following = attrs["following"]
         if user == following:
             raise serializers.ValidationError("Нельзя подписаться на себя")
-        if Subscription.objects.filter(user=user, following=following).exists():
+        if Subscription.objects.filter(
+            user=user, following=following
+        ).exists():
             raise serializers.ValidationError("Уже подписаны")
         attrs["user"] = user
         return attrs
@@ -89,7 +93,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         request = self.context.get("request")
         avatar = obj.following.avatar
-        return request.build_absolute_uri(avatar.url) if avatar and request else None
+        return (
+            request.build_absolute_uri(avatar.url)
+            if avatar and request
+            else None
+        )
 
     def get_is_subscribed(self, obj):
         return True  # мы отдаем только мои подписки
@@ -109,10 +117,13 @@ class AvatarSerializer(serializers.ModelSerializer):
         model = User
         fields = ("avatar",)
 
-
     def to_representation(self, instance):
         request = self.context.get("request")
         avatar = instance.avatar
         return {
-            "avatar": request.build_absolute_uri(avatar.url) if avatar and request else None
+            "avatar": (
+                request.build_absolute_uri(avatar.url)
+                if avatar and request
+                else None
+            )
         }
