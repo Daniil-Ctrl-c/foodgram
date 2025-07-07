@@ -29,7 +29,7 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
 
-# ─────────────────────────────── Теги и ингредиенты ────────────────────────────
+# ─────────────────────────────── Теги и ингредиенты ─────────────────────
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -66,7 +66,7 @@ class IngredientAmountWriteSerializer(serializers.ModelSerializer):
         fields = ("id", "amount")
 
 
-# ─────────────────────────────── Чтение рецептов ──────────────────────────────
+# ─────────────────────────────── Чтение рецептов ────────────────────────
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -126,7 +126,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         )
 
 
-# ─────────────────────────────── Запись рецептов ──────────────────────────────
+# ─────────────────────────────── Запись рецептов ────────────────────────
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
@@ -184,7 +184,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ─────────────────────────────── Универсальный фасад ──────────────────────────
+# ─────────────────────────────── Универсальный фасад ────────────────────
 
 
 class RecipeSerializer(serializers.Serializer):
@@ -207,7 +207,7 @@ class RecipeSerializer(serializers.Serializer):
         )
 
 
-# ──────────────────────── Сериализаторы для связей «рецепт‒юзер» ──────────────
+# ──────────────────────── Сериализаторы для связей «рецепт‒юзер» ────────
 
 
 class _RelationBaseSerializer(serializers.ModelSerializer):

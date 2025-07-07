@@ -7,7 +7,7 @@ from rest_framework import serializers
 from users.models import Subscription, User
 
 
-# ────────────────────────────── Пользователь ──────────────────────────────────
+# ────────────────────────────── Пользователь ────────────────────────────
 class UserCreateSerializer(BaseUserCreateSerializer):
     """Регистрация пользователя (с аватаром, опционально)."""
 
@@ -43,7 +43,7 @@ class UserSerializer(BaseUserSerializer):
         )
 
 
-# ──────────────────────── Подписки (создание / вывод) ─────────────────────────
+# ──────────────────────── Подписки (создание / вывод) ───────────────────
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
     """Создание подписки через POST /users/{id}/subscribe/."""
 
@@ -117,7 +117,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         ).data
 
 
-# ──────────────────────────── Аватар ──────────────────────────────────────────
+# ──────────────────────────── Аватар ────────────────────────────────────
 class AvatarSerializer(serializers.ModelSerializer):
     avatar = Base64ImageField(required=True, use_url=True)
 

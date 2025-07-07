@@ -38,7 +38,7 @@ class UserViewSet(BaseUserViewSet):
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # ──────────────── подписка / отписка ──────────────────────────────────────
+    # ──────────────── подписка / отписка ────────────────────────────────────
     @action(
         detail=True, methods=["post"], permission_classes=[IsAuthenticated]
     )
@@ -85,7 +85,7 @@ class UserViewSet(BaseUserViewSet):
         )
         return self.get_paginated_response(serializer.data)
 
-    # ────────────────────────────────── аватар ───────────────────────────────
+    # ────────────────────────────────── аватар ──────────────────────────────
     @action(
         detail=False,
         methods=["get", "patch", "put"],

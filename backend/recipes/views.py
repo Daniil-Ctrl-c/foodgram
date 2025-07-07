@@ -108,7 +108,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ShoppingCartCreateSerializer, request, pk, add=False
         )
 
-    # ─────────────────────────── списки избранное / корзина ──────────────────
+    # ─────────────────────────── списки избранное / корзина ─────────────────
     @action(detail=False, methods=["get"], url_path="shopping_cart")
     def shopping_cart_list(self, request):
         qs = Recipe.objects.filter(shoppingcart__user=request.user)
@@ -127,7 +127,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).data
         return self.get_paginated_response(data)
 
-    # ─────────────────────────── download_shopping_cart ──────────────────────
+    # ─────────────────────────── download_shopping_cart ─────────────────────
     def _build_shopping_list(self, request):
         """Формирует txt-файл со списком покупок."""
         items = (
