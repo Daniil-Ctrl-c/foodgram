@@ -1,12 +1,15 @@
 import base64
+import six
 import uuid
 
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser.serializers import (
     UserCreateSerializer as BaseUserCreateSerializer,
+    UserSerializer as BaseUserSerializer,
 )
-from djoser.serializers import UserSerializer as BaseUserSerializer
+from rest_framework import serializers
+
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -15,9 +18,8 @@ from recipes.models import (
     ShoppingCart,
     Tag,
 )
-from rest_framework import serializers
-import six
 from users.models import Subscription, User
+
 
 # ──────────────────────────── base64 image ──────────────────────────────
 
