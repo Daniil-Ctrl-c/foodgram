@@ -38,7 +38,6 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = (
         "tags",
         "author",
-        # "cooking_time",  # оставим обычный числовой фильтр, без range
     )
     search_fields = ("name", "author__username")
     autocomplete_fields = ("tags",)
@@ -60,13 +59,12 @@ class RecipeAdmin(admin.ModelAdmin):
     image_thumbnail.short_description = "Фото"
 
     def favorite_count(self, obj):
-        return obj.favorited_by.count()
+        return Favorite.objects.filter(recipe=obj).count()
 
     favorite_count.short_description = "В избранном"
 
     def export_to_csv(self, request, queryset):
         import csv
-
         from django.http import HttpResponse
 
         field_names = ["id", "name", "author", "cooking_time"]
