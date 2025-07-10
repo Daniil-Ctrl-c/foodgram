@@ -5,7 +5,9 @@ from django.db import models
 
 class User(AbstractUser):
     email = models.EmailField(
-        unique=True, max_length=254, verbose_name="Email",
+        unique=True,
+        max_length=254,
+        verbose_name="Email",
     )
     first_name = models.CharField(max_length=150, verbose_name="Имя")
     last_name = models.CharField(max_length=150, verbose_name="Фамилия")
@@ -46,7 +48,8 @@ class Subscription(models.Model):
         verbose_name_plural = "Подписки"
         constraints = [
             models.UniqueConstraint(
-                fields=["user", "following"], name="unique_subscription",
+                fields=["user", "following"],
+                name="unique_subscription",
             ),
         ]
 
