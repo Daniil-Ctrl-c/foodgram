@@ -260,7 +260,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="get-link")
     def get_link(self, request, pk=None):
-        """Возвращает абсолютную ссылку на рецепт."""
         recipe = self.get_object()
         link = request.build_absolute_uri(f"/recipes/{recipe.id}/")
-        return Response({"link": link}, status=status.HTTP_200_OK)
+        return Response({"url": link}, status=status.HTTP_200_OK)
+
