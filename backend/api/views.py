@@ -263,4 +263,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = self.get_object()
         link = request.build_absolute_uri(f"/recipes/{recipe.id}/")
         return Response({"url": link}, status=status.HTTP_200_OK)
-
+    
