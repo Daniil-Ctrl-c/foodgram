@@ -23,15 +23,39 @@ class UserAdmin(BaseUserAdmin):
     )
     readonly_fields = ("avatar",)
     inlines = (ShoppingCartInline,)
-    list_display = ("username", "email", "is_active", "is_staff", "avatar")
+
+    list_display = (
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_active",
+        "is_staff",
+        "avatar",
+    )
     list_display_links = ("username", "email")
     list_filter = ("is_staff", "is_active")
-    search_fields = ("username", "email")
+    # добавлен поиск по ФИО
+    search_fields = ("username", "email", "first_name", "last_name")
 
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ("user", "following")
     list_filter = ("user", "following")
-    search_fields = ("user__username", "following__username")
+    search_fields = (
+        "user__username",
+        "user__first_name",
+        "user__last_name",
+        "following__username",
+        "following__first_name",
+        "following__last_name",
+    )
     autocomplete_fields = ("user", "following")
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("user", "following")
+        )

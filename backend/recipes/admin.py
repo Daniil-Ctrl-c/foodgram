@@ -1,4 +1,7 @@
+import csv
 from django.contrib import admin
+from django.db.models import Count
+from django.http import HttpResponse
 from django.utils.html import format_html
 
 from recipes.models import (
@@ -28,17 +31,15 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = (IngredientInRecipeInline,)
 
     list_display = (
-        "id",
         "name",
         "author",
         "cooking_time",
         "favorite_count",
         "image_thumbnail",
+        "id",
     )
-    list_filter = (
-        "tags",
-        "author",
-    )
+    list_display_links = ("name",)
+    list_filter = ("tags", "author")
     search_fields = ("name", "author__username")
     autocomplete_fields = ("tags",)
     filter_horizontal = ("tags",)
@@ -48,6 +49,17 @@ class RecipeAdmin(admin.ModelAdmin):
     class Media:
         js = ("admin/js/positive_only.js",)
 
+    def get_queryset(self, request):
+        qs = (
+            super()
+            .get_queryset(request)
+            .select_related("author")
+            .prefetch_related("tags", "ingredientinrecipe_set__ingredient")
+            .annotate(favorite_count=Count("favorite"))
+        )
+        return qs
+
+    @admin.display(description="Фото")
     def image_thumbnail(self, obj):
         if obj.image:
             return format_html(
@@ -56,17 +68,12 @@ class RecipeAdmin(admin.ModelAdmin):
             )
         return "-"
 
-    image_thumbnail.short_description = "Фото"
-
+    @admin.display(description="В избранном", ordering="favorite_count")
     def favorite_count(self, obj):
-        return Favorite.objects.filter(recipe=obj).count()
+        return obj.favorite_count
 
-    favorite_count.short_description = "В избранном"
-
+    @admin.action(description="Экспорт выбранных рецептов в CSV")
     def export_to_csv(self, request, queryset):
-        import csv
-        from django.http import HttpResponse
-
         field_names = ["id", "name", "author", "cooking_time"]
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=recipes.csv"
@@ -77,8 +84,6 @@ class RecipeAdmin(admin.ModelAdmin):
                 [obj.id, obj.name, obj.author.username, obj.cooking_time],
             )
         return response
-
-    export_to_csv.short_description = "Экспорт выбранных рецептов в CSV"
 
 
 @admin.register(Ingredient)
@@ -102,9 +107,19 @@ class FavoriteAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe")
     list_filter = ("user",)
 
+    def get_queryset(self, request):
+        return (
+            super().get_queryset(request).select_related("user", "recipe")
+        )
+
 
 @admin.register(ShoppingCart)
 class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ("user", "recipe")
     list_filter = ("user",)
-    autocomplete_fields = ("user", "recipe")
+    search_fields = ("user__username", "recipe__name")
+
+    def get_queryset(self, request):
+        return (
+            super().get_queryset(request).select_related("user", "recipe")
+        )

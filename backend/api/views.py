@@ -11,6 +11,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
+from api.filters import IngredientFilter, RecipeFilter
 from api.serializers import (
     AvatarSerializer,
     FavoriteCreateSerializer,
@@ -24,7 +25,6 @@ from api.serializers import (
     UserCreateSerializer,
     UserSerializer,
 )
-from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.models import Subscription, User
 
@@ -285,4 +285,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_link(self, request, pk=None):
         recipe = self.get_object()
         link = request.build_absolute_uri(f"/recipes/{recipe.id}/")
-        return Response({"url": link}, status=status.HTTP_200_OK)
+        return Response({"link": link}, status=status.HTTP_200_OK)
