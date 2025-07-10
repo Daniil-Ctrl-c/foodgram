@@ -1,15 +1,14 @@
 import base64
-import six
 import uuid
 
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from djoser.serializers import (
     UserCreateSerializer as BaseUserCreateSerializer,
-    UserSerializer as BaseUserSerializer,
 )
+from djoser.serializers import UserSerializer as BaseUserSerializer
 from rest_framework import serializers
-
+import six
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -20,7 +19,6 @@ from recipes.models import (
 )
 from users.models import Subscription, User
 
-
 # ──────────────────────────── base64 image ──────────────────────────────
 
 
@@ -29,7 +27,7 @@ class Base64ImageField(serializers.ImageField):
 
     def to_internal_value(self, data):
         if isinstance(data, six.string_types) and data.startswith(
-            "data:image"
+            "data:image",
         ):
             header, imgstr = data.split(";base64,")
             ext = header.split("/")[-1]
@@ -57,7 +55,7 @@ class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField(source="ingredient.id")
     name = serializers.ReadOnlyField(source="ingredient.name")
     measurement_unit = serializers.ReadOnlyField(
-        source="ingredient.measurement_unit"
+        source="ingredient.measurement_unit",
     )
 
     class Meta:
@@ -67,7 +65,7 @@ class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
 
 class IngredientAmountWriteSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
-        source="ingredient", queryset=Ingredient.objects.all()
+        source="ingredient", queryset=Ingredient.objects.all(),
     )
 
     class Meta:
@@ -82,7 +80,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
     ingredients = IngredientInRecipeReadSerializer(
-        source="ingredient_links", many=True, read_only=True
+        source="ingredient_links", many=True, read_only=True,
     )
     image = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
@@ -137,7 +135,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountWriteSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all()
+        many=True, queryset=Tag.objects.all(),
     )
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(min_value=1)
@@ -164,14 +162,14 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
                     amount=item["amount"],
                 )
                 for item in ingredients
-            ]
+            ],
         )
 
     def create(self, validated_data):
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
         recipe = Recipe.objects.create(
-            author=self.context["request"].user, **validated_data
+            author=self.context["request"].user, **validated_data,
         )
         self._save_tags_and_ingredients(recipe, tags, ingredients)
         return recipe
@@ -197,17 +195,17 @@ class RecipeSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):
         return RecipeWriteSerializer(
-            data=data, context=self.context
+            data=data, context=self.context,
         ).run_validation(data)
 
     def create(self, validated_data):
         return RecipeWriteSerializer(context=self.context).create(
-            validated_data
+            validated_data,
         )
 
     def update(self, instance, validated_data):
         return RecipeWriteSerializer(context=self.context).update(
-            instance, validated_data
+            instance, validated_data,
         )
 
 
@@ -272,7 +270,7 @@ class UserSerializer(BaseUserSerializer):
             False
             if not request or request.user.is_anonymous
             else Subscription.objects.filter(
-                user=request.user, following=obj
+                user=request.user, following=obj,
             ).exists()
         )
 
@@ -282,7 +280,7 @@ class UserSerializer(BaseUserSerializer):
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
     following = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), write_only=True
+        queryset=User.objects.all(), write_only=True,
     )
 
     class Meta:
@@ -295,7 +293,7 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         if user == following:
             raise serializers.ValidationError("Нельзя подписаться на себя")
         if Subscription.objects.filter(
-            user=user, following=following
+            user=user, following=following,
         ).exists():
             raise serializers.ValidationError("Уже подписаны")
         attrs["user"] = user
@@ -342,7 +340,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         qs = obj.following.recipes.all()[:3]
         return RecipeReadSerializer(
-            qs, many=True, context=self.context
+            qs, many=True, context=self.context,
         ).data
 
 
@@ -364,5 +362,5 @@ class AvatarSerializer(serializers.ModelSerializer):
                 request.build_absolute_uri(avatar.url)
                 if avatar and request
                 else None
-            )
+            ),
         }

@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.utils.html import format_html
-
 from recipes.models import (
     Favorite,
     Ingredient,
@@ -65,6 +64,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def export_to_csv(self, request, queryset):
         import csv
+
         from django.http import HttpResponse
 
         field_names = ["id", "name", "author", "cooking_time"]
@@ -74,7 +74,7 @@ class RecipeAdmin(admin.ModelAdmin):
         writer.writerow(field_names)
         for obj in queryset:
             writer.writerow(
-                [obj.id, obj.name, obj.author.username, obj.cooking_time]
+                [obj.id, obj.name, obj.author.username, obj.cooking_time],
             )
         return response
 

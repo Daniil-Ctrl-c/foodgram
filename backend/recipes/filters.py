@@ -1,5 +1,4 @@
 from django_filters import rest_framework as filters
-
 from recipes.models import Ingredient, Recipe
 
 
@@ -8,7 +7,7 @@ class RecipeFilter(filters.FilterSet):
     author = filters.NumberFilter(field_name="author__id")
     is_favorited = filters.BooleanFilter(method="filter_favorited")
     is_in_shopping_cart = filters.BooleanFilter(
-        method="filter_shopping_cart"
+        method="filter_shopping_cart",
     )
 
     class Meta:
@@ -17,8 +16,7 @@ class RecipeFilter(filters.FilterSet):
 
     # --- избранное --------------------------------------------------------
     def filter_favorited(self, queryset, name, value):
-        """
-        true  -> вернуть рецепты, которые пользователь добавил в избранное
+        """True  -> вернуть рецепты, которые пользователь добавил в избранное
         false -> исключить такие рецепты
         """
         user = getattr(self.request, "user", None)
@@ -35,8 +33,7 @@ class RecipeFilter(filters.FilterSet):
 
     # --- корзина ----------------------------------------------------------
     def filter_shopping_cart(self, queryset, name, value):
-        """
-        true  -> рецепты, находящиеся в корзине пользователя
+        """True  -> рецепты, находящиеся в корзине пользователя
         false -> рецепты, не находящиеся в корзине
         """
         user = getattr(self.request, "user", None)
