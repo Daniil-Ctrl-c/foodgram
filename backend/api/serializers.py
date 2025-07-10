@@ -19,8 +19,6 @@ from recipes.models import (
 )
 from users.models import Subscription, User
 
-# ──────────────────────────── base64 image ──────────────────────────────
-
 
 class Base64ImageField(serializers.ImageField):
     """Принимает изображение в формате base64 и сохраняет как ImageField."""
@@ -34,9 +32,6 @@ class Base64ImageField(serializers.ImageField):
             name = f"{uuid.uuid4().hex[:10]}.{ext}"
             data = ContentFile(base64.b64decode(imgstr), name=name)
         return super().to_internal_value(data)
-
-
-# ─────────────────────────────── Теги и ингредиенты ─────────────────────
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -72,9 +67,6 @@ class IngredientAmountWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = IngredientInRecipe
         fields = ("id", "amount")
-
-
-# ─────────────────────────────── Чтение рецептов ────────────────────────
 
 
 class RecipeReadSerializer(serializers.ModelSerializer):
@@ -130,9 +122,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             if user.is_anonymous
             else obj.shoppingcart.filter(user=user).exists()
         )
-
-
-# ─────────────────────────────── Запись рецептов ────────────────────────
 
 
 class RecipeWriteSerializer(serializers.ModelSerializer):
@@ -191,9 +180,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return instance
 
 
-# ─────────────────────────────── Универсальный фасад ────────────────────
-
-
 class RecipeSerializer(serializers.Serializer):
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
@@ -214,9 +200,6 @@ class RecipeSerializer(serializers.Serializer):
             instance,
             validated_data,
         )
-
-
-# ──────────────────────── Сериализаторы для связей «рецепт‒юзер» ────────
 
 
 class _RelationBaseSerializer(serializers.ModelSerializer):
@@ -246,9 +229,6 @@ class FavoriteCreateSerializer(_RelationBaseSerializer):
 class ShoppingCartCreateSerializer(_RelationBaseSerializer):
     class Meta(_RelationBaseSerializer.Meta):
         model = ShoppingCart
-
-
-# ────────────────────────────── Пользователь ────────────────────────────
 
 
 class UserCreateSerializer(BaseUserCreateSerializer):
@@ -281,9 +261,6 @@ class UserSerializer(BaseUserSerializer):
                 following=obj,
             ).exists()
         )
-
-
-# ──────────────────────── Подписки (создание / вывод) ───────────────────
 
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
@@ -354,9 +331,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             many=True,
             context=self.context,
         ).data
-
-
-# ──────────────────────────── Аватар ────────────────────────────────────
 
 
 class AvatarSerializer(serializers.ModelSerializer):
