@@ -65,7 +65,8 @@ class IngredientInRecipeReadSerializer(serializers.ModelSerializer):
 
 class IngredientAmountWriteSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
-        source="ingredient", queryset=Ingredient.objects.all(),
+        source="ingredient",
+        queryset=Ingredient.objects.all(),
     )
 
     class Meta:
@@ -80,7 +81,9 @@ class RecipeReadSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
     ingredients = IngredientInRecipeReadSerializer(
-        source="ingredient_links", many=True, read_only=True,
+        source="ingredient_links",
+        many=True,
+        read_only=True,
     )
     image = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
@@ -135,7 +138,8 @@ class RecipeReadSerializer(serializers.ModelSerializer):
 class RecipeWriteSerializer(serializers.ModelSerializer):
     ingredients = IngredientAmountWriteSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all(),
+        many=True,
+        queryset=Tag.objects.all(),
     )
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(min_value=1)
@@ -169,7 +173,8 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         tags = validated_data.pop("tags")
         ingredients = validated_data.pop("ingredients")
         recipe = Recipe.objects.create(
-            author=self.context["request"].user, **validated_data,
+            author=self.context["request"].user,
+            **validated_data,
         )
         self._save_tags_and_ingredients(recipe, tags, ingredients)
         return recipe
@@ -195,7 +200,8 @@ class RecipeSerializer(serializers.Serializer):
 
     def to_internal_value(self, data):
         return RecipeWriteSerializer(
-            data=data, context=self.context,
+            data=data,
+            context=self.context,
         ).run_validation(data)
 
     def create(self, validated_data):
@@ -205,7 +211,8 @@ class RecipeSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         return RecipeWriteSerializer(context=self.context).update(
-            instance, validated_data,
+            instance,
+            validated_data,
         )
 
 
@@ -270,7 +277,8 @@ class UserSerializer(BaseUserSerializer):
             False
             if not request or request.user.is_anonymous
             else Subscription.objects.filter(
-                user=request.user, following=obj,
+                user=request.user,
+                following=obj,
             ).exists()
         )
 
@@ -280,7 +288,8 @@ class UserSerializer(BaseUserSerializer):
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):
     following = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), write_only=True,
+        queryset=User.objects.all(),
+        write_only=True,
     )
 
     class Meta:
@@ -293,7 +302,8 @@ class SubscriptionCreateSerializer(serializers.ModelSerializer):
         if user == following:
             raise serializers.ValidationError("Нельзя подписаться на себя")
         if Subscription.objects.filter(
-            user=user, following=following,
+            user=user,
+            following=following,
         ).exists():
             raise serializers.ValidationError("Уже подписаны")
         attrs["user"] = user
@@ -340,7 +350,9 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         qs = obj.following.recipes.all()[:3]
         return RecipeReadSerializer(
-            qs, many=True, context=self.context,
+            qs,
+            many=True,
+            context=self.context,
         ).data
 
 
