@@ -28,8 +28,6 @@ from recipes.filters import IngredientFilter, RecipeFilter
 from recipes.models import Ingredient, IngredientInRecipe, Recipe, Tag
 from users.models import Subscription, User
 
-# ─────────────────────────────── Пользователи ───────────────────────────
-
 
 class UserViewSet(BaseUserViewSet):
     """Пользователи + подписки + аватар."""
@@ -130,9 +128,6 @@ class UserViewSet(BaseUserViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# ─────────────────────────────── Теги и ингредиенты ─────────────────────
-
-
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -145,9 +140,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filterset_class = IngredientFilter
     pagination_class = None
-
-
-# ─────────────────────────────── Рецепты ────────────────────────────────
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
