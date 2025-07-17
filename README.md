@@ -97,7 +97,6 @@ https://foodgram-daniil.duckdns.org/admin/
 admin@gmail.com
 
 **пароль:**
-admin
 
 ## Автор
 
