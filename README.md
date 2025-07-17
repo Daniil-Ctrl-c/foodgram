@@ -88,17 +88,6 @@ TELEGRAM_TO=your_chat_id
 * Перезапуск контейнеров и развёртывание обновлений
 * Уведомление об успешном деплое в Telegram
 
-## Админка
-
-**ссылка:**
-https://foodgram-daniil.duckdns.org/admin/
-
-**почта:**
-admin@gmail.com
-
-**пароль:**
-admin
-
 ## Автор
 
 **Daniil-Ctrl-c**
